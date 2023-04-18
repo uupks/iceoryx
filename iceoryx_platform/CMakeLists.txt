@@ -32,10 +32,15 @@ if(CMAKE_SYSTEM_NAME MATCHES Linux OR CMAKE_SYSTEM_NAME MATCHES Darwin)
     option(BUILD_SHARED_LIBS "Create shared libraries by default" ON)
 endif()
 
+set(PUBLIC_LIBS "")
+
 if(IOX_PLATFORM_PATH)
     set(ICEORYX_PLATFORM ${IOX_PLATFORM_PATH})
 elseif(LINUX)
     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/linux/)
+    set(PUBLIC_LIBS "rt pthread")
+elseif(ANDROID)
+    set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/android/)
 elseif(QNX)
     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/qnx/)
 elseif(APPLE)
@@ -44,8 +49,10 @@ elseif(WIN32)
     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/win/)
 elseif(UNIX)
     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/unix/)
+    set(PUBLIC_LIBS "rt pthread")
 else()
     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/unix/)
+    set(PUBLIC_LIBS "rt pthread")
     message(WARNING "Could not detect supported platform, but I'm feeling lucky today. Maybe its Unix." )
 endif()
 
@@ -66,8 +73,8 @@ iox_add_library(
     NAMESPACE                   iceoryx_platform
     PROJECT_PREFIX              ${PREFIX}
     EXPORT_INCLUDE_DIRS         ${ICEORYX_PLATFORM}/include/
-    PUBLIC_LIBS_LINUX           rt pthread
-    PUBLIC_LIBS_UNIX            rt pthread
+    PUBLIC_LIBS_LINUX           ${PUBLIC_LIBS}
+    PUBLIC_LIBS_UNIX            ${PUBLIC_LIBS}
     PRIVATE_LIBS_QNX            socket
     BUILD_INTERFACE             ${ICEORYX_PLATFORM}/include/
     INSTALL_INTERFACE           include/${PREFIX}
